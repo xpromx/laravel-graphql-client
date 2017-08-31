@@ -1,0 +1,24 @@
+{
+    "name": "travelience/laravel-graphql-client",
+    "description": "GraphQL Client For Laravel",
+    "homepage": "https://github.com/xpromx/laravel-graphql-client",
+    "authors": [
+        {
+            "name": "xpromx",
+            "email": "xpromx@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.6.0",
+        "laravel/framework": "~5.2"
+    },
+    "version": "1.0.1",
+
+    "autoload": {
+        "psr-0": {
+            "Travelience\\GraphQL": "src/"
+        }
+    }
+
+}
