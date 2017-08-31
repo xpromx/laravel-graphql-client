@@ -1,6 +1,8 @@
 <?php
 
-namespace Travelience\Seo;
+namespace Travelience\GraphQL;
+
+use Travelience\GraphQL\Response;
 
 class GraphQL
 {
@@ -8,28 +10,49 @@ class GraphQL
     protected $key = 'grarphql';
     protected $host = false;
     protected $token = false;
-    protected $errors = false;
     protected $minutes = false;
 
-    public function __construct( $host=false, $token=false )
+    /**
+     * Constructor of the GraphQL Client
+     *
+     * @param  string  $host
+     * @param  string  $token
+     * @return void
+     */
+    public function __construct( $host=null, $token=false )
     {
         $this->host = ( $host ?? config('graphql.host') );
+        
         $this->token = $token;
         $this->minutes = config('graphql.minutes');
     }
 
-    public function getToken( $token )
+    /**
+     * Set the Authentication token
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function setToken( $token )
     {
         $this->token = $token;
     }
 
-    public function query( $query, $params=[], $cache=false )
+    /**
+     * Make the query response
+     *
+     * @param  string  $query
+     * @param  array  $params
+     * @param  integer $cache
+     * @return Response
+     */
+    public function query( $query, $params=[], $cache=null )
     {
-
+        
         // query in cache?
-		if( $data = $this->cache( $query ) )
+		if( $data = $this->hasCache( $query ) )
 		{
-			return $data;
+			return new Response( $data, $query );
         }
         
         // reset errors
@@ -37,6 +60,12 @@ class GraphQL
 
         // curl to host
         $ch = curl_init( $this->host );
+
+        // attach token to the params
+        if( $this->token )
+        {
+            $params['token'] = $this->token;
+        }
 
         $params = array_merge($params, ['query' => $query]);
         
@@ -49,71 +78,38 @@ class GraphQL
 
         $data = json_decode($r);
 
-        // check if we have errors
-        if( $this->errors )
+        // response without cache
+        if( !isset($cache) )
         {
-            $this->errors[] = $this->errors['message'];
-
-            if( isset( $this->errors['validation'] ) )
-            {
-                $this->errors = array_merge( $this->errors, $this->errors['validation'] );
-            }
-
-            return false;
+            return new Response( $data, $query );
         }
+        
+        $cache = ( is_numeric($cache) ? $cache : $this->minutes );
 
-        // return response
-        return $this->cache( $query,  $data->data, ( $cache > 1 ? $cache : $this->minutes ) );
+        return new Response( $data, $query, $cache );
+
 
     }
 
-    public function cache( $query, $params=[], $cache=false )
-    {
-        return $this-query( $query, $params, $cache );
-    }
-
-    public function cacheResponse( $query, $data=false, $minutes=720 )
+    /**
+     * Validate if this query is already in the cache
+     *
+     * @param  string  $query
+     * @return object
+     */
+    public function hasCache( $query )
     {
         $key = md5($query);
 
-        if( $data )
-        {
-            cache( [$key => $data], $minutes);
-            return $data;
-        }
-
         if( $data = cache($key) )
         {
-            return $data;
+            return json_decode($data);
         }
 
         return false;
     }
 
-    public function errors()
-    {
-        return $this->errors;
-    }
-
-    public function hasError()
-    {
-        if( $this->errors )
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    public function getErrorMessage()
-    {
-        if( !$this->hasError() )
-        {
-            return false;
-        }
-
-        return $this->errors[0];
-    }
+    
 
 
 }

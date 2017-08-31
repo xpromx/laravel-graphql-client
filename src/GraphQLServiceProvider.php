@@ -3,7 +3,7 @@
 namespace Travelience\GraphQL;
 
 use Illuminate\Support\ServiceProvider;
-use Route;
+use Travelience\GraphQL\GraphQL;
 
 class GraphQLServiceProvider extends ServiceProvider
 {
@@ -26,6 +26,11 @@ class GraphQLServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        
+        $this->app->singleton('graphql', function () {
+            return new GraphQL();
+        });
+
+        $this->app->alias('graphql', GraphQL::class);
+
     }
 }
