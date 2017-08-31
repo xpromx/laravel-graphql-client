@@ -1,21 +1,16 @@
 # Installation
 
+### You can install this package via composer using this command:
+```
+composer require travelience/laravel-graphql-client
+```
 
-### Composer.json
-add to your composer.json the package and the repository.
+### Or add in your composer.json
 
 ```
    "require": {
         "travelience/laravel-graphql-client": "dev-master"
    },
-   "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/xpromx/laravel-graphql-client.git",
-            "no-api": true
-            
-        }
-    ]
 ```
 
 

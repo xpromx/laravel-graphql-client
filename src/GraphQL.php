@@ -46,7 +46,7 @@ class GraphQL
      * @param  integer $cache
      * @return Response
      */
-    public function query( $query, $params=[], $cache=null )
+    public function query( $query, $params=false, $cache=null )
     {
         
         // query in cache?
@@ -55,12 +55,19 @@ class GraphQL
 			return new Response( $data, $query );
         }
         
+        
         // reset errors
         $this->errors = false;
 
         // curl to host
         $ch = curl_init( $this->host );
 
+
+        if( !is_array($params) )
+        {
+            $params = [];
+        }
+        
         // attach token to the params
         if( $this->token )
         {
@@ -103,7 +110,7 @@ class GraphQL
 
         if( $data = cache($key) )
         {
-            return json_decode($data);
+            return $data;
         }
 
         return false;
